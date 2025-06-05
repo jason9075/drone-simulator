@@ -1,5 +1,6 @@
-import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+// Import Three.js and GLTFLoader directly from the CDN
+import * as THREE from 'https://unpkg.com/three@0.151.0/build/three.module.js'
+import { GLTFLoader } from 'https://unpkg.com/three@0.151.0/examples/jsm/loaders/GLTFLoader.js'
 
 // --------------- 1. Three.js 場景、相機、渲染器 ---------------
 const scene = new THREE.Scene()
