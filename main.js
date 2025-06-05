@@ -63,28 +63,48 @@ loader.load(
 let gpIndex = null
 window.addEventListener('gamepadconnected', (e) => {
   gpIndex = e.gamepad.index
-  document.getElementById('hud').innerText = 'Controller 已連接'
+  document.getElementById('hud').innerText = `Controller 已連接：${e.gamepad.id}`
 })
 window.addEventListener('gamepaddisconnected', (e) => {
   if (gpIndex === e.gamepad.index) {
     gpIndex = null
-    document.getElementById('hud').innerText = '請連接 PS4 Controller'
+    document.getElementById('hud').innerText =
+      '請連接 Controller 或使用鍵盤 (W/S Q/E 方向鍵)'
   }
+})
+
+// --------------- 3.1. Keyboard 控制 ---------------
+const keyState = {}
+window.addEventListener('keydown', (e) => {
+  keyState[e.code] = true
+})
+window.addEventListener('keyup', (e) => {
+  keyState[e.code] = false
 })
 
 function getInput() {
   const input = { throttle: 0, yaw: 0, pitch: 0, roll: 0 }
-  if (gpIndex === null) return input
-  const gp = navigator.getGamepads()[gpIndex]
-  if (!gp) return input
+  const gp = gpIndex !== null ? navigator.getGamepads()[gpIndex] : null
 
-  // 左搖桿 axes[0,1] → roll, pitch
-  input.roll = gp.axes[0]
-  input.pitch = gp.axes[1]
+  if (gp) {
+    // 左搖桿 axes[0,1] → roll, pitch
+    input.roll = gp.axes[0]
+    input.pitch = gp.axes[1]
 
-  // 右搖桿 axes[2,3] → yaw, throttle
-  input.yaw = gp.axes[2]
-  input.throttle = (-gp.axes[3] + 1) / 2
+    // 右搖桿 axes[2,3] → yaw, throttle
+    input.yaw = gp.axes[2]
+    input.throttle = (-gp.axes[3] + 1) / 2
+  } else {
+    // Keyboard 控制
+    input.throttle = keyState['KeyW'] ? 1 : 0
+    if (keyState['KeyS']) input.throttle = 0
+
+    input.yaw = (keyState['KeyQ'] ? -1 : 0) + (keyState['KeyE'] ? 1 : 0)
+    input.pitch =
+      (keyState['ArrowDown'] ? 1 : 0) + (keyState['ArrowUp'] ? -1 : 0)
+    input.roll =
+      (keyState['ArrowLeft'] ? -1 : 0) + (keyState['ArrowRight'] ? 1 : 0)
+  }
 
   return input
 }
